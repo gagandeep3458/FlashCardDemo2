@@ -62,9 +62,7 @@ class MainViewModel : ViewModel() {
                                 name = "${category.name} Card 5",
                                 color = category.color,
                             )
-                        ).also {
-                            it.last().isActive = true
-                        }
+                        )
                     )
                     val animation = when {
                         index < activeIndexForCategory -> CardsAnimateType.FADE_OUT_AND_SLIDE_TO_LEFT
@@ -110,7 +108,18 @@ class MainViewModel : ViewModel() {
                         this[i] = this[i].copy(isActive = false)
                     }
                 }
+
+                // Reset the dragged state for all cards of this category
+                val currentCategoryCards = this.first { it.category.id == newCategory.id }
+                currentCategoryCards.list.onEach {
+                    it.hasBeenDragged = false
+                }
             }
         }
+    }
+
+    fun cardRemoved(card: Card, cards: CardsOfCategory) {
+        val index = cards.list.indexOf(card)
+        cards.list[index] = card.copy(hasBeenDragged = true)
     }
 }

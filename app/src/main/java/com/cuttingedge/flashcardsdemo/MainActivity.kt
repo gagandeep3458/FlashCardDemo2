@@ -34,6 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
+import com.alexstyl.swipeablecard.rememberSwipeableCardState
+import com.alexstyl.swipeablecard.swipableCard
 import com.cuttingedge.flashcardsdemo.models.CardsAnimateType
 import com.cuttingedge.flashcardsdemo.models.CardsOfCategory
 import com.cuttingedge.flashcardsdemo.models.Category
@@ -66,12 +69,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalSwipeableCardApi::class)
     @Composable
     fun MainScreen(
         categories: SnapshotStateList<Category>,
         cardsOfCategories: SnapshotStateList<CardsOfCategory>,
         newCategorySelected: (old: Category?, new: Category) -> Unit
     ) {
+
+        val viewModel by viewModels<MainViewModel>()
 
         Row(
             modifier = Modifier
@@ -95,18 +101,26 @@ class MainActivity : ComponentActivity() {
                             alpha = 0F
                             offsetX = -400
                         }
+
                         CardsAnimateType.FADE_OUT_AND_RESET_TO_CENTER -> {
                             alpha = 0F
                             offsetX = 0
                         }
+
                         CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER -> {
                             alpha = 1F
                             offsetX = 0
                         }
                     }
 
-                    val offsetXAnimated by animateDpAsState(targetValue = offsetX.dp, tween(durationMillis = 800))
-                    val alphaAnimated by animateFloatAsState(targetValue = alpha, tween(durationMillis = 800))
+                    val offsetXAnimated by animateDpAsState(
+                        targetValue = offsetX.dp,
+                        tween(durationMillis = 800)
+                    )
+                    val alphaAnimated by animateFloatAsState(
+                        targetValue = alpha,
+                        tween(durationMillis = 800)
+                    )
 
                     Box(
                         modifier = Modifier
@@ -116,38 +130,51 @@ class MainActivity : ComponentActivity() {
 
                     ) {
                         cards.list.forEachIndexed { i, card ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(
-                                        bottom = getBottomPaddingForCard(i, cards.list.size),
-                                        start = 24.dp,
-                                        top = 24.dp,
-                                        end = 24.dp
-                                    )
-                                    .background(
-                                        color = Color.DarkGray,
-                                        shape = RoundedCornerShape(24.dp)
-                                    )
-                                    .border(
-                                        width = 8.dp,
-                                        color = card.color.copy(
-                                            alpha = getAlphaForCard(
+                            if (!card.hasBeenDragged) {
+
+                                val state = rememberSwipeableCardState()
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .swipableCard(state = state, onSwiped = {
+                                            viewModel.cardRemoved(card, cards)
+                                        })
+                                        .padding(
+                                            bottom = getBottomPaddingForCard(
                                                 i,
-                                                cards.list.size
-                                            )
+                                                cards.list.filter { !it.hasBeenDragged }.size
+                                            ),
+                                            start = 24.dp,
+                                            top = 24.dp,
+                                            end = 24.dp
+                                        )
+                                        .background(
+                                            color = Color.DarkGray,
+                                            shape = RoundedCornerShape(24.dp)
+                                        )
+                                        .border(
+                                            width = 8.dp,
+                                            color = card.color.copy(
+                                                alpha = getAlphaForCard(
+                                                    i,
+                                                    cards.list.filter { !it.hasBeenDragged }.size
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(24.dp)
                                         ),
-                                        shape = RoundedCornerShape(24.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = card.name,
-                                    style = TextStyle(
-                                        fontSize = 24.sp,
-                                        textAlign = TextAlign.Center
+                                    contentAlignment = Alignment.Center
+                                ) {
+
+                                    Text(
+                                        text = card.name,
+                                        style = TextStyle(
+                                            fontSize = 24.sp,
+                                            textAlign = TextAlign.Center
+                                        )
                                     )
-                                )
+
+                                }
                             }
                         }
                     }
