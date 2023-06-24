@@ -11,7 +11,7 @@ import com.cuttingedge.flashcardsdemo.models.Category
 class MainViewModel : ViewModel() {
 
     val categories = mutableStateListOf<Category>()
-    val cards = mutableStateListOf<CardsOfCategory>()
+    val cardsOfCategoryList = mutableStateListOf<CardsOfCategory>()
 
     init {
 
@@ -35,7 +35,7 @@ class MainViewModel : ViewModel() {
         // Populate Cards for each Category
 
         categories.forEachIndexed { index, category ->
-            cards.add(
+            cardsOfCategoryList.add(
                 CardsOfCategory(
                     isActive = category.isActive,
                     category = category,
@@ -76,19 +76,20 @@ class MainViewModel : ViewModel() {
 
     fun newCategorySelected(oldCategory: Category?, newCategory: Category) {
         if (oldCategory != null) {
-            val indexOfOldCategory = categories.indexOf(oldCategory)
-            val indexOfNewCategory = categories.indexOf(newCategory)
+            val indexOfOldCategory = categories.indexOfFirst { it.id == oldCategory.id }
+            val indexOfNewCategory = categories.indexOfFirst { it.id == newCategory.id }
 
             // Change Tab Selected
             categories.apply {
-                this[indexOfOldCategory] = oldCategory.copy(isActive = false)
-                this[indexOfNewCategory] = newCategory.copy(isActive = true)
+                this[indexOfOldCategory] = this[indexOfOldCategory].copy(isActive = false)
+                this[indexOfNewCategory] = this[indexOfNewCategory].copy(isActive = true)
             }
 
-            cards.apply {
+            cardsOfCategoryList.apply {
 
                 // Change Cards Displayed
-                val indexOfNewSetOfCards = cards.indexOfFirst { it.category.id == newCategory.id }
+                val indexOfNewSetOfCards =
+                    cardsOfCategoryList.indexOfFirst { it.category.id == newCategory.id }
 
                 // Update prev items positions
                 for (i in 0..indexOfNewSetOfCards.minus(1)) {
@@ -121,5 +122,21 @@ class MainViewModel : ViewModel() {
     fun cardRemoved(card: Card, cards: CardsOfCategory) {
         val index = cards.list.indexOf(card)
         cards.list[index] = card.copy(hasBeenDragged = true)
+
+        // If all cards have been dragged of this category then switch to next category
+        if (cards.list.none { !it.hasBeenDragged }) {
+            val sizeOfCategories = cardsOfCategoryList.size
+            val indexOfCurrentCategory = cardsOfCategoryList.indexOfFirst { it.isActive }
+            val indexOfNewCategory = if (indexOfCurrentCategory == sizeOfCategories.minus(1)) {
+                0
+            } else {
+                indexOfCurrentCategory.plus(1)
+            }
+
+            newCategorySelected(
+                cardsOfCategoryList[indexOfCurrentCategory].category,
+                cardsOfCategoryList[indexOfNewCategory].category
+            )
+        }
     }
 }

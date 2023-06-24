@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
                     MainScreen(
                         categories = viewModel.categories,
-                        cardsOfCategories = viewModel.cards,
+                        cardsOfCategories = viewModel.cardsOfCategoryList,
                         newCategorySelected = { oldCategory, newCategory ->
                             viewModel.newCategorySelected(oldCategory, newCategory)
                         })
