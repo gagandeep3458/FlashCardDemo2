@@ -2,6 +2,8 @@ package com.cuttingedge.flashcardsdemo
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.cuttingedge.flashcardsdemo.models.Card
 import com.cuttingedge.flashcardsdemo.models.CardsAnimateType
@@ -40,29 +42,35 @@ class MainViewModel : ViewModel() {
                     isActive = category.isActive,
                     category = category,
                 ).also { cardsOfCategory ->
-                    cardsOfCategory.list.addAll(
-                        listOf(
-                            Card(
-                                name = "${category.name} Card 1",
-                                color = category.color
-                            ),
-                            Card(
-                                name = "${category.name} Card 2",
-                                color = category.color
-                            ),
-                            Card(
-                                name = "${category.name} Card 3",
-                                color = category.color
-                            ),
-                            Card(
-                                name = "${category.name} Card 4",
-                                color = category.color
-                            ),
-                            Card(
-                                name = "${category.name} Card 5",
-                                color = category.color,
-                            )
+                    val list = listOf(
+                        Card(
+                            name = "${category.name} Card 1",
+                            color = category.color
+                        ),
+                        Card(
+                            name = "${category.name} Card 2",
+                            color = category.color
+                        ),
+                        Card(
+                            name = "${category.name} Card 3",
+                            color = category.color
+                        ),
+                        Card(
+                            name = "${category.name} Card 4",
+                            color = category.color
+                        ),
+                        Card(
+                            name = "${category.name} Card 5",
+                            color = category.color,
                         )
+                    )
+                    cardsOfCategory.list.addAll(
+                        list.onEachIndexed { i, c ->
+                            c.alpha = getAlphaForCard(i, list.size)
+                            c.currentAlpha = c.alpha
+                            c.bottomPadding = getBottomPaddingForCard(i, list.size)
+                            c.currentBottomPadding = c.bottomPadding
+                        }
                     )
                     val animation = when {
                         index < activeIndexForCategory -> CardsAnimateType.FADE_OUT_AND_SLIDE_TO_LEFT
@@ -115,6 +123,12 @@ class MainViewModel : ViewModel() {
                 currentCategoryCards.list.onEach {
                     it.hasBeenDragged = false
                 }
+                currentCategoryCards.list.onEachIndexed { i, c ->
+                    c.alpha = getAlphaForCard(i, currentCategoryCards.list.size)
+                    c.currentAlpha = c.alpha
+                    c.bottomPadding = getBottomPaddingForCard(i, currentCategoryCards.list.size)
+                    c.currentBottomPadding = c.bottomPadding
+                }
             }
         }
     }
@@ -122,6 +136,15 @@ class MainViewModel : ViewModel() {
     fun cardRemoved(card: Card, cards: CardsOfCategory) {
         val index = cards.list.indexOf(card)
         cards.list[index] = card.copy(hasBeenDragged = true)
+
+        // Recalculate alpha and bottom padding of cards
+        val newList = cards.list.filter { !it.hasBeenDragged }
+        newList.onEachIndexed { i, c ->
+            c.alpha = getAlphaForCard(i, newList.size)
+            c.currentAlpha = c.alpha
+            c.bottomPadding = getBottomPaddingForCard(i, newList.size)
+            c.currentBottomPadding = c.bottomPadding
+        }
 
         // If all cards have been dragged of this category then switch to next category
         if (cards.list.none { !it.hasBeenDragged }) {
@@ -137,6 +160,24 @@ class MainViewModel : ViewModel() {
                 cardsOfCategoryList[indexOfCurrentCategory].category,
                 cardsOfCategoryList[indexOfNewCategory].category
             )
+        }
+    }
+
+    private fun getAlphaForCard(i: Int, size: Int): Float {
+        return when (i) {
+            size.minus(1) -> 1F
+            size.minus(2) -> 0.5F
+            size.minus(3) -> 0.2F
+            else -> 0F
+        }
+    }
+
+    private fun getBottomPaddingForCard(i: Int, size: Int): Dp {
+        return when (i) {
+            size.minus(1) -> 60.dp
+            size.minus(2) -> 30.dp
+            size.minus(3) -> 0.dp
+            else -> 0.dp
         }
     }
 }

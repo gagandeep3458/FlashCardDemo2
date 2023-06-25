@@ -29,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -41,6 +43,7 @@ import com.cuttingedge.flashcardsdemo.models.CardsAnimateType
 import com.cuttingedge.flashcardsdemo.models.CardsOfCategory
 import com.cuttingedge.flashcardsdemo.models.Category
 import com.cuttingedge.flashcardsdemo.ui.theme.FlashCardsDemoTheme
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
 
@@ -78,6 +81,10 @@ class MainActivity : ComponentActivity() {
     ) {
 
         val viewModel by viewModels<MainViewModel>()
+
+        val screenWidth = with(LocalDensity.current) {
+            LocalConfiguration.current.screenWidthDp.dp.toPx()
+        }
 
         Row(
             modifier = Modifier
@@ -129,10 +136,67 @@ class MainActivity : ComponentActivity() {
                             .alpha(alpha = alphaAnimated)
 
                     ) {
+
+                        val lastIndex = cards.list.filter { !it.hasBeenDragged }.lastIndex
+
                         cards.list.forEachIndexed { i, card ->
                             if (!card.hasBeenDragged) {
 
                                 val state = rememberSwipeableCardState()
+
+                                if (i > 0) {
+                                    // Recalculate previous card's alpha and bottom padding
+                                    // based on how much current card has slide
+
+                                    val xDragValue =
+                                        abs(state.offset.value.x.div(screenWidth.times(1.5F)))
+
+
+                                    if (lastIndex.minus(i) == 0 && lastIndex >= 1) {
+                                        cards.list[i.minus(1)].currentAlpha =
+                                            getAlphaFromDragValue(
+                                                cards.list[i.minus(1)].alpha,
+                                                cards.list[i.minus(0)].alpha,
+                                                xDragValue
+                                            )
+                                        cards.list[i.minus(1)].currentBottomPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(1)].bottomPadding.value,
+                                                cards.list[i.minus(0)].bottomPadding.value,
+                                                xDragValue
+                                            )
+                                    }
+
+                                    if (lastIndex.minus(i.minus(1)) == 1 && lastIndex >= 2) {
+                                        cards.list[i.minus(2)].currentAlpha =
+                                            getAlphaFromDragValue(
+                                                cards.list[i.minus(2)].alpha,
+                                                cards.list[i.minus(1)].alpha,
+                                                xDragValue
+                                            )
+                                        cards.list[i.minus(2)].currentBottomPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(2)].bottomPadding.value,
+                                                cards.list[i.minus(1)].bottomPadding.value,
+                                                xDragValue
+                                            )
+                                    }
+
+                                    if (lastIndex.minus(i.minus(2)) == 2 && lastIndex >= 3) {
+                                        cards.list[i.minus(3)].currentAlpha =
+                                            getAlphaFromDragValue(
+                                                cards.list[i.minus(3)].alpha,
+                                                cards.list[i.minus(2)].alpha,
+                                                xDragValue
+                                            )
+                                        cards.list[i.minus(3)].currentBottomPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(3)].bottomPadding.value,
+                                                cards.list[i.minus(2)].bottomPadding.value,
+                                                xDragValue
+                                            )
+                                    }
+                                }
 
                                 Box(
                                     modifier = Modifier
@@ -141,25 +205,21 @@ class MainActivity : ComponentActivity() {
                                             viewModel.cardRemoved(card, cards)
                                         })
                                         .padding(
-                                            bottom = getBottomPaddingForCard(
-                                                i,
-                                                cards.list.filter { !it.hasBeenDragged }.size
-                                            ),
+                                            bottom = card.currentBottomPadding,
                                             start = 24.dp,
                                             top = 24.dp,
                                             end = 24.dp
                                         )
                                         .background(
-                                            color = Color.DarkGray,
+                                            color = Color.DarkGray.copy(
+                                                alpha = card.currentAlpha
+                                            ),
                                             shape = RoundedCornerShape(24.dp)
                                         )
                                         .border(
                                             width = 8.dp,
                                             color = card.color.copy(
-                                                alpha = getAlphaForCard(
-                                                    i,
-                                                    cards.list.filter { !it.hasBeenDragged }.size
-                                                )
+                                                alpha = card.currentAlpha
                                             ),
                                             shape = RoundedCornerShape(24.dp)
                                         ),
@@ -212,20 +272,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getAlphaForCard(i: Int, size: Int): Float {
-        return when (i) {
-            size.minus(1) -> 1F
-            size.minus(2) -> 0.5F
-            size.minus(3) -> 0.2F
-            else -> 0F
-        }
+    private fun getDpFromDragValue(startDp: Float, endDp: Float, interpolationValue: Float): Dp {
+        val clampedInterpolationValue = interpolationValue.coerceIn(0F, 1F)
+        return (startDp + (endDp - startDp) * clampedInterpolationValue).toInt().dp
     }
 
-    private fun getBottomPaddingForCard(i: Int, size: Int): Dp {
-        return when (i) {
-            size.minus(1) -> 60.dp
-            size.minus(2) -> 30.dp
-            else -> 0.dp
-        }
+    private fun getAlphaFromDragValue(
+        startAlpha: Float,
+        endAlpha: Float,
+        interpolationValue: Float
+    ): Float {
+        val clampedInterpolationValue = interpolationValue.coerceIn(0F, 1F)
+        return startAlpha + (endAlpha - startAlpha) * clampedInterpolationValue
     }
 }
