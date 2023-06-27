@@ -84,6 +84,12 @@ class MainViewModel : ViewModel() {
         }
 
         cardsOfCategoryList[initiallySelectedIndex].isVisible = true
+        val indexOfUpcomingCategory = if (initiallySelectedIndex == categories.size.minus(1)) {
+            0
+        } else {
+            initiallySelectedIndex.plus(1)
+        }
+        cardsOfCategoryList[indexOfUpcomingCategory].isVisible = true
     }
 
     fun newCategorySelected(oldCategory: Category?, newCategory: Category) {
@@ -104,6 +110,13 @@ class MainViewModel : ViewModel() {
                     cardsOfCategoryList.indexOfFirst { it.category.id == oldCategory.id }
                 val indexOfNewSetOfCards =
                     cardsOfCategoryList.indexOfFirst { it.category.id == newCategory.id }
+                val indexOfUpcomingSetOfCards =
+                    if (indexOfNewSetOfCards == categories.size.minus(1)) {
+                        0
+                    } else {
+                        indexOfNewSetOfCards.plus(1)
+                    }
+
 
                 // Update prev items positions
                 for (i in 0..indexOfNewSetOfCards.minus(1)) {
@@ -137,7 +150,8 @@ class MainViewModel : ViewModel() {
                 }
 
                 this.forEachIndexed { index, cardsOfCategory ->
-                    val isVisible = index == indexOfOldSetOfCards || index == indexOfNewSetOfCards
+                    val isVisible =
+                        index == indexOfOldSetOfCards || index == indexOfNewSetOfCards || index == indexOfUpcomingSetOfCards
                     cardsOfCategory.isVisible = isVisible
                 }
             }
