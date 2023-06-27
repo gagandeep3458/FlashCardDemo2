@@ -69,7 +69,9 @@ class MainViewModel : ViewModel() {
                             c.alpha = getAlphaForCard(i, list.size)
                             c.currentAlpha = c.alpha
                             c.bottomPadding = getBottomPaddingForCard(i, list.size)
+                            c.topPadding = getTopPaddingForCard(i, list.size)
                             c.currentBottomPadding = c.bottomPadding
+                            c.currentTopPadding = c.topPadding
                         }
                     )
                     val animation = when {
@@ -127,7 +129,9 @@ class MainViewModel : ViewModel() {
                     c.alpha = getAlphaForCard(i, currentCategoryCards.list.size)
                     c.currentAlpha = c.alpha
                     c.bottomPadding = getBottomPaddingForCard(i, currentCategoryCards.list.size)
+                    c.topPadding = getTopPaddingForCard(i, currentCategoryCards.list.size)
                     c.currentBottomPadding = c.bottomPadding
+                    c.currentTopPadding = c.topPadding
                 }
             }
         }
@@ -143,7 +147,9 @@ class MainViewModel : ViewModel() {
             c.alpha = getAlphaForCard(i, newList.size)
             c.currentAlpha = c.alpha
             c.bottomPadding = getBottomPaddingForCard(i, newList.size)
+            c.topPadding = getTopPaddingForCard(i, newList.size)
             c.currentBottomPadding = c.bottomPadding
+            c.currentTopPadding = c.topPadding
         }
 
         // If all cards have been dragged of this category then switch to next category
@@ -179,5 +185,14 @@ class MainViewModel : ViewModel() {
             size.minus(3) -> 0.dp
             else -> 0.dp
         }
+    }
+
+    private fun getTopPaddingForCard(i: Int, size: Int): Dp {
+        return when (i) {
+            size.minus(1) -> 0.dp
+            size.minus(2) -> 30.dp
+            size.minus(3) -> 60.dp
+            else -> 60.dp
+        }.plus(24.dp)
     }
 }

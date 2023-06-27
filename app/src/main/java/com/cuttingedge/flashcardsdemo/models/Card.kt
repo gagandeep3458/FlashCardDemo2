@@ -13,5 +13,7 @@ data class Card(
     var alpha: Float = 1F,
     var currentAlpha: Float = 1F,
     var bottomPadding: Dp = 0.dp,
-    var currentBottomPadding: Dp = 0.dp
+    var currentBottomPadding: Dp = 0.dp,
+    var topPadding: Dp = 0.dp,
+    var currentTopPadding: Dp = 0.dp
 )

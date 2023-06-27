@@ -165,6 +165,12 @@ class MainActivity : ComponentActivity() {
                                                 cards.list[i.minus(0)].bottomPadding.value,
                                                 xDragValue
                                             )
+                                        cards.list[i.minus(1)].currentTopPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(1)].topPadding.value,
+                                                cards.list[i.minus(0)].topPadding.value,
+                                                xDragValue
+                                            )
                                     }
 
                                     if (lastIndex.minus(i.minus(1)) == 1 && lastIndex >= 2) {
@@ -178,6 +184,12 @@ class MainActivity : ComponentActivity() {
                                             getDpFromDragValue(
                                                 cards.list[i.minus(2)].bottomPadding.value,
                                                 cards.list[i.minus(1)].bottomPadding.value,
+                                                xDragValue
+                                            )
+                                        cards.list[i.minus(2)].currentTopPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(2)].topPadding.value,
+                                                cards.list[i.minus(1)].topPadding.value,
                                                 xDragValue
                                             )
                                     }
@@ -195,6 +207,12 @@ class MainActivity : ComponentActivity() {
                                                 cards.list[i.minus(2)].bottomPadding.value,
                                                 xDragValue
                                             )
+                                        cards.list[i.minus(3)].currentTopPadding =
+                                            getDpFromDragValue(
+                                                cards.list[i.minus(3)].topPadding.value,
+                                                cards.list[i.minus(2)].topPadding.value,
+                                                xDragValue
+                                            )
                                     }
                                 }
 
@@ -207,7 +225,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(
                                             bottom = card.currentBottomPadding,
                                             start = 24.dp,
-                                            top = 24.dp,
+                                            top = card.currentTopPadding,
                                             end = 24.dp
                                         )
                                         .background(
