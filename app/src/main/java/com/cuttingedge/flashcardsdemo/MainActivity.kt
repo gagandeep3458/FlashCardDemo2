@@ -244,13 +244,16 @@ class MainActivity : ComponentActivity() {
                                     contentAlignment = Alignment.Center
                                 ) {
 
-                                    Text(
-                                        text = card.name,
-                                        style = TextStyle(
-                                            fontSize = 24.sp,
-                                            textAlign = TextAlign.Center
+                                    if (i >= lastIndex.minus(2)) {
+
+                                        Text(
+                                            text = card.name,
+                                            style = TextStyle(
+                                                fontSize = 24.sp,
+                                                textAlign = TextAlign.Center
+                                            )
                                         )
-                                    )
+                                    }
 
                                 }
                             }
