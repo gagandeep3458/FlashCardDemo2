@@ -128,12 +128,17 @@ class MainViewModel : ViewModel() {
                         indexOfNewSetOfCards.plus(1)
                     }
 
+                if (indexOfUpcomingSetOfCards == 0) {
+                    cardsOfCategoryList[0].list.onEach { it.hasBeenDragged = false }
+                }
 
                 // Update prev items positions
                 for (i in 0..indexOfNewSetOfCards.minus(1)) {
                     this[i].apply {
                         this.currentAlpha = 0F
                         this.currentOffsetX = (-400).dp
+                        this.animationDurationMillis = 800F
+                        this.isVisible = i == indexOfOldSetOfCards || i == indexOfUpcomingSetOfCards
                     }
                     this[i] = this[i].copy(isActive = false)
                 }
@@ -143,6 +148,7 @@ class MainViewModel : ViewModel() {
                     this.currentAlpha = 1F
                     this.currentOffsetX = (0).dp
                     this.animationDurationMillis = 800F
+                    this.isVisible = true
                 }
                 this[indexOfNewSetOfCards] = this[indexOfNewSetOfCards].copy(isActive = true)
 
@@ -152,6 +158,9 @@ class MainViewModel : ViewModel() {
                         this[i].apply {
                             this.currentAlpha = 0F
                             this.currentOffsetX = (0).dp
+                            this.animationDurationMillis = 800F
+                            this.isVisible =
+                                i == indexOfOldSetOfCards || i == indexOfUpcomingSetOfCards
                         }
                         this[i] = this[i].copy(isActive = false)
                     }
@@ -167,12 +176,6 @@ class MainViewModel : ViewModel() {
                     c.topPadding = getTopPaddingForCard(i, currentCategoryCards.list.size)
                     c.currentBottomPadding = c.bottomPadding
                     c.currentTopPadding = c.topPadding
-                }
-
-                this.forEachIndexed { index, cardsOfCategory ->
-                    val isVisible =
-                        index == indexOfOldSetOfCards || index == indexOfNewSetOfCards || index == indexOfUpcomingSetOfCards
-                    cardsOfCategory.isVisible = isVisible
                 }
             }
         }

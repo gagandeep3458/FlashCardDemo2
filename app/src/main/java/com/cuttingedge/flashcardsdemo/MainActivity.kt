@@ -97,16 +97,17 @@ class MainActivity : ComponentActivity() {
                     .weight(0.85F)
                     .fillMaxSize()
             ) {
-                cardsOfCategories.sortedByDescending { it.category.index }.forEach { cards ->
+                cardsOfCategories.sortedByDescending { it.category.index }
+                    .forEachIndexed { ii, cards ->
 
-                    val offsetXAnimated by animateDpAsState(
-                        targetValue = cards.currentOffsetX,
-                        tween(durationMillis = cards.animationDurationMillis.toInt())
-                    )
-                    val alphaAnimated by animateFloatAsState(
-                        targetValue = cards.currentAlpha,
-                        tween(durationMillis = cards.animationDurationMillis.toInt())
-                    )
+                        val offsetXAnimated by animateDpAsState(
+                            targetValue = cards.currentOffsetX,
+                            tween(durationMillis = cards.animationDurationMillis.toInt())
+                        )
+                        val alphaAnimated by animateFloatAsState(
+                            targetValue = cards.currentAlpha,
+                            tween(durationMillis = cards.animationDurationMillis.toInt())
+                        )
 
                     Box(
                         modifier = Modifier
@@ -148,13 +149,13 @@ class MainActivity : ComponentActivity() {
                                                 animationDurationMillis = 50F
                                             )
 
-                                        if (indexOfCurrentSetOfCards == cardsOfCategories.lastIndex && indexOfCurrentSetOfCards != 0) {
+                                        if (indexOfCurrentSetOfCards == cardsOfCategories.lastIndex) {
                                             cardsOfCategories[0] =
                                                 cardsOfCategories[0].copy(
                                                     currentAlpha = xDragValue,
                                                     currentOffsetX = getCurrentOffsetOfUpcomingCard(
                                                         xDragValue,
-                                                        -400.dp,
+                                                        (-400).dp,
                                                         0.dp
                                                     ),
                                                     animationDurationMillis = 50F
