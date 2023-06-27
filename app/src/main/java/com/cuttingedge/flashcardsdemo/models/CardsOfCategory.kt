@@ -9,6 +9,7 @@ data class CardsOfCategory(
     val list: SnapshotStateList<Card> = mutableStateListOf(),
     val isActive: Boolean = false,
     val category: Category,
+    var isVisible: Boolean = false,
     var animationType: CardsAnimateType = CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER
 )
 

@@ -82,6 +82,8 @@ class MainViewModel : ViewModel() {
                     cardsOfCategory.animationType = animation
                 })
         }
+
+        cardsOfCategoryList[initiallySelectedIndex].isVisible = true
     }
 
     fun newCategorySelected(oldCategory: Category?, newCategory: Category) {
@@ -98,6 +100,8 @@ class MainViewModel : ViewModel() {
             cardsOfCategoryList.apply {
 
                 // Change Cards Displayed
+                val indexOfOldSetOfCards =
+                    cardsOfCategoryList.indexOfFirst { it.category.id == oldCategory.id }
                 val indexOfNewSetOfCards =
                     cardsOfCategoryList.indexOfFirst { it.category.id == newCategory.id }
 
@@ -122,16 +126,19 @@ class MainViewModel : ViewModel() {
 
                 // Reset the dragged state for all cards of this category
                 val currentCategoryCards = this.first { it.category.id == newCategory.id }
-                currentCategoryCards.list.onEach {
-                    it.hasBeenDragged = false
-                }
                 currentCategoryCards.list.onEachIndexed { i, c ->
+                    c.hasBeenDragged = false
                     c.alpha = getAlphaForCard(i, currentCategoryCards.list.size)
                     c.currentAlpha = c.alpha
                     c.bottomPadding = getBottomPaddingForCard(i, currentCategoryCards.list.size)
                     c.topPadding = getTopPaddingForCard(i, currentCategoryCards.list.size)
                     c.currentBottomPadding = c.bottomPadding
                     c.currentTopPadding = c.topPadding
+                }
+
+                this.forEachIndexed { index, cardsOfCategory ->
+                    val isVisible = index == indexOfOldSetOfCards || index == indexOfNewSetOfCards
+                    cardsOfCategory.isVisible = isVisible
                 }
             }
         }
