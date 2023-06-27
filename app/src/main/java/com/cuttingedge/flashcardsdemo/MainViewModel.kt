@@ -128,8 +128,20 @@ class MainViewModel : ViewModel() {
                         indexOfNewSetOfCards.plus(1)
                     }
 
-                if (indexOfUpcomingSetOfCards == 0) {
-                    cardsOfCategoryList[0].list.onEach { it.hasBeenDragged = false }
+                for (i in 0..lastIndex) {
+                    if (i != indexOfOldSetOfCards) {
+                        cardsOfCategoryList[i].list.onEachIndexed { ii, c ->
+                            c.hasBeenDragged = false
+                            c.alpha = getAlphaForCard(ii, cardsOfCategoryList[i].list.size)
+                            c.currentAlpha = c.alpha
+                            c.bottomPadding =
+                                getBottomPaddingForCard(ii, cardsOfCategoryList[i].list.size)
+                            c.topPadding =
+                                getTopPaddingForCard(ii, cardsOfCategoryList[i].list.size)
+                            c.currentBottomPadding = c.bottomPadding
+                            c.currentTopPadding = c.topPadding
+                        }
+                    }
                 }
 
                 // Update prev items positions
@@ -167,16 +179,16 @@ class MainViewModel : ViewModel() {
                 }
 
                 // Reset the dragged state for all cards of this category
-                val currentCategoryCards = this.first { it.category.id == newCategory.id }
-                currentCategoryCards.list.onEachIndexed { i, c ->
-                    c.hasBeenDragged = false
-                    c.alpha = getAlphaForCard(i, currentCategoryCards.list.size)
-                    c.currentAlpha = c.alpha
-                    c.bottomPadding = getBottomPaddingForCard(i, currentCategoryCards.list.size)
-                    c.topPadding = getTopPaddingForCard(i, currentCategoryCards.list.size)
-                    c.currentBottomPadding = c.bottomPadding
-                    c.currentTopPadding = c.topPadding
-                }
+//                val currentCategoryCards = this.first { it.category.id == newCategory.id }
+//                currentCategoryCards.list.onEachIndexed { i, c ->
+//                    c.hasBeenDragged = false
+//                    c.alpha = getAlphaForCard(i, currentCategoryCards.list.size)
+//                    c.currentAlpha = c.alpha
+//                    c.bottomPadding = getBottomPaddingForCard(i, currentCategoryCards.list.size)
+//                    c.topPadding = getTopPaddingForCard(i, currentCategoryCards.list.size)
+//                    c.currentBottomPadding = c.bottomPadding
+//                    c.currentTopPadding = c.topPadding
+//                }
             }
         }
     }
