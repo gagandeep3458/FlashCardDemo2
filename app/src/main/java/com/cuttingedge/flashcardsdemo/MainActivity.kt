@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
-import com.cuttingedge.flashcardsdemo.models.CardsAnimateType
 import com.cuttingedge.flashcardsdemo.models.CardsOfCategory
 import com.cuttingedge.flashcardsdemo.models.Category
 import com.cuttingedge.flashcardsdemo.ui.theme.FlashCardsDemoTheme
@@ -100,34 +99,13 @@ class MainActivity : ComponentActivity() {
             ) {
                 cardsOfCategories.sortedByDescending { it.category.index }.forEach { cards ->
 
-
-                    val offsetX: Int
-                    val alpha: Float
-
-                    when (cards.animationType) {
-                        CardsAnimateType.FADE_OUT_AND_SLIDE_TO_LEFT -> {
-                            alpha = 0F
-                            offsetX = -400
-                        }
-
-                        CardsAnimateType.FADE_OUT_AND_RESET_TO_CENTER -> {
-                            alpha = 0F
-                            offsetX = 0
-                        }
-
-                        CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER -> {
-                            alpha = 1F
-                            offsetX = 0
-                        }
-                    }
-
                     val offsetXAnimated by animateDpAsState(
-                        targetValue = offsetX.dp,
+                        targetValue = cards.currentOffsetX,
                         tween(durationMillis = 800)
                     )
                     val alphaAnimated by animateFloatAsState(
-                        targetValue = alpha,
-                        tween(durationMillis = 800)
+                        targetValue = cards.currentAlpha,
+                        tween(durationMillis = cards.animationDurationMillis.toInt())
                     )
 
                     Box(
@@ -147,13 +125,33 @@ class MainActivity : ComponentActivity() {
 
                                     val state = rememberSwipeableCardState()
 
+                                    val xDragValue =
+                                        abs(state.offset.value.x.div(screenWidth.times(1.5F)))
+
+                                    if (i == 0 && xDragValue > 0.1F) {
+
+                                        val indexOfCurrentSetOfCards =
+                                            cardsOfCategories.indexOf(cards)
+
+                                        val indexOfUpcomingSetOfCards =
+                                            if (indexOfCurrentSetOfCards == cardsOfCategories.size.minus(
+                                                    1
+                                                )
+                                            ) {
+                                                0
+                                            } else {
+                                                indexOfCurrentSetOfCards.plus(1)
+                                            }
+                                        cardsOfCategories[indexOfUpcomingSetOfCards] =
+                                            cardsOfCategories[indexOfUpcomingSetOfCards].copy(
+                                                currentAlpha = xDragValue,
+                                                animationDurationMillis = 50F
+                                            )
+                                    }
+
                                     if (i > 0) {
                                         // Recalculate previous card's alpha and bottom padding
                                         // based on how much current card has slide
-
-                                        val xDragValue =
-                                            abs(state.offset.value.x.div(screenWidth.times(1.5F)))
-
 
                                         if (lastIndex.minus(i) == 0 && lastIndex >= 1) {
                                             cards.list[i.minus(1)].currentAlpha =

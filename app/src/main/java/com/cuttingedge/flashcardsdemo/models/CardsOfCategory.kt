@@ -2,6 +2,8 @@ package com.cuttingedge.flashcardsdemo.models
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import java.util.UUID
 
 data class CardsOfCategory(
@@ -10,11 +12,7 @@ data class CardsOfCategory(
     val isActive: Boolean = false,
     val category: Category,
     var isVisible: Boolean = false,
-    var animationType: CardsAnimateType = CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER
+    var currentOffsetX: Dp = 0.dp,
+    var currentAlpha: Float = 1F,
+    var animationDurationMillis: Float = 800F
 )
-
-enum class CardsAnimateType {
-    FADE_OUT_AND_SLIDE_TO_LEFT,
-    FADE_OUT_AND_RESET_TO_CENTER,
-    FADE_IN_AND_RESET_TO_CENTER
-}

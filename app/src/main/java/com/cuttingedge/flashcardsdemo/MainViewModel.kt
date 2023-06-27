@@ -6,7 +6,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.cuttingedge.flashcardsdemo.models.Card
-import com.cuttingedge.flashcardsdemo.models.CardsAnimateType
 import com.cuttingedge.flashcardsdemo.models.CardsOfCategory
 import com.cuttingedge.flashcardsdemo.models.Category
 
@@ -74,12 +73,24 @@ class MainViewModel : ViewModel() {
                             c.currentTopPadding = c.topPadding
                         }
                     )
-                    val animation = when {
-                        index < activeIndexForCategory -> CardsAnimateType.FADE_OUT_AND_SLIDE_TO_LEFT
-                        index > activeIndexForCategory -> CardsAnimateType.FADE_OUT_AND_RESET_TO_CENTER
-                        else -> CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER
+                    cardsOfCategory.apply {
+                        when {
+                            index < activeIndexForCategory -> {
+                                this.currentAlpha = 0F
+                                this.currentOffsetX = (-400).dp
+                            }
+
+                            index > activeIndexForCategory -> {
+                                this.currentAlpha = 0F
+                                this.currentOffsetX = (0).dp
+                            }
+
+                            else -> {
+                                this.currentAlpha = 1F
+                                this.currentOffsetX = (0).dp
+                            }
+                        }
                     }
-                    cardsOfCategory.animationType = animation
                 })
         }
 
@@ -120,19 +131,28 @@ class MainViewModel : ViewModel() {
 
                 // Update prev items positions
                 for (i in 0..indexOfNewSetOfCards.minus(1)) {
-                    this[i].animationType = CardsAnimateType.FADE_OUT_AND_SLIDE_TO_LEFT
+                    this[i].apply {
+                        this.currentAlpha = 0F
+                        this.currentOffsetX = (-400).dp
+                    }
                     this[i] = this[i].copy(isActive = false)
                 }
 
                 // Update animation for newly selected cards
-                this[indexOfNewSetOfCards].animationType =
-                    CardsAnimateType.FADE_IN_AND_RESET_TO_CENTER
+                this[indexOfNewSetOfCards].apply {
+                    this.currentAlpha = 1F
+                    this.currentOffsetX = (0).dp
+                    this.animationDurationMillis = 800F
+                }
                 this[indexOfNewSetOfCards] = this[indexOfNewSetOfCards].copy(isActive = true)
 
                 // update next items positions
                 if (indexOfNewSetOfCards < this.lastIndex) {
                     for (i in indexOfNewSetOfCards.plus(1)..lastIndex) {
-                        this[i].animationType = CardsAnimateType.FADE_OUT_AND_RESET_TO_CENTER
+                        this[i].apply {
+                            this.currentAlpha = 0F
+                            this.currentOffsetX = (0).dp
+                        }
                         this[i] = this[i].copy(isActive = false)
                     }
                 }
