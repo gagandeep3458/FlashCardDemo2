@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
                     val offsetXAnimated by animateDpAsState(
                         targetValue = cards.currentOffsetX,
-                        tween(durationMillis = 800)
+                        tween(durationMillis = cards.animationDurationMillis.toInt())
                     )
                     val alphaAnimated by animateFloatAsState(
                         targetValue = cards.currentAlpha,
@@ -147,6 +147,19 @@ class MainActivity : ComponentActivity() {
                                                 currentAlpha = xDragValue,
                                                 animationDurationMillis = 50F
                                             )
+
+                                        if (indexOfCurrentSetOfCards == cardsOfCategories.lastIndex && indexOfCurrentSetOfCards != 0) {
+                                            cardsOfCategories[0] =
+                                                cardsOfCategories[0].copy(
+                                                    currentAlpha = xDragValue,
+                                                    currentOffsetX = getCurrentOffsetOfUpcomingCard(
+                                                        xDragValue,
+                                                        -400.dp,
+                                                        0.dp
+                                                    ),
+                                                    animationDurationMillis = 50F
+                                                )
+                                        }
                                     }
 
                                     if (i > 0) {
@@ -294,6 +307,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun getCurrentOffsetOfUpcomingCard(
+        interpolationValue: Float,
+        startDp: Dp,
+        endDp: Dp
+    ): Dp {
+        val clampedInterpolationValue = interpolationValue.coerceIn(0F, 1F)
+        return (startDp + (endDp - startDp) * clampedInterpolationValue)
     }
 
     private fun getDpFromDragValue(startDp: Float, endDp: Float, interpolationValue: Float): Dp {
