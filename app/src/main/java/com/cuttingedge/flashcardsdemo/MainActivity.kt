@@ -129,7 +129,9 @@ class MainActivity : ComponentActivity() {
                                     val xDragValue =
                                         abs(state.offset.value.x.div(screenWidth.times(1.5F)))
 
-                                    if (i == 0 && xDragValue > 0.1F) {
+                                    // Recalculate previous card deck's alpha and bottom padding
+                                    // based on how much current card has slide
+                                    if (i == 0 && xDragValue > 0.1F && cardsOfCategories.size > 1) {
 
                                         val indexOfCurrentSetOfCards =
                                             cardsOfCategories.indexOf(cards)
@@ -163,9 +165,10 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
 
+                                    // Recalculate previous card's alpha and bottom padding
+                                    // based on how much current card has slide
                                     if (i > 0) {
-                                        // Recalculate previous card's alpha and bottom padding
-                                        // based on how much current card has slide
+
 
                                         if (lastIndex.minus(i) == 0 && lastIndex >= 1) {
                                             cards.list[i.minus(1)].currentAlpha =

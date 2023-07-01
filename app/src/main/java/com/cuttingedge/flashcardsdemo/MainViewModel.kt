@@ -5,9 +5,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cuttingedge.flashcardsdemo.models.Card
 import com.cuttingedge.flashcardsdemo.models.CardsOfCategory
 import com.cuttingedge.flashcardsdemo.models.Category
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
@@ -210,19 +214,96 @@ class MainViewModel : ViewModel() {
 
         // If all cards have been dragged of this category then switch to next category
         if (cards.list.none { !it.hasBeenDragged }) {
-            val sizeOfCategories = cardsOfCategoryList.size
-            val indexOfCurrentCategory = cardsOfCategoryList.indexOfFirst { it.isActive }
-            val indexOfNewCategory = if (indexOfCurrentCategory == sizeOfCategories.minus(1)) {
-                0
+            if (cardsOfCategoryList.size > 1) {
+                val sizeOfCategories = cardsOfCategoryList.size
+                val indexOfCurrentCategory = cardsOfCategoryList.indexOfFirst { it.isActive }
+                val indexOfNewCategory = if (indexOfCurrentCategory == sizeOfCategories.minus(1)) {
+                    0
+                } else {
+                    indexOfCurrentCategory.plus(1)
+                }
+
+                newCategorySelected(
+                    cardsOfCategoryList[indexOfCurrentCategory].category,
+                    cardsOfCategoryList[indexOfNewCategory].category
+                )
             } else {
-                indexOfCurrentCategory.plus(1)
+                resetFlashCards()
+            }
+        }
+    }
+
+    private fun resetFlashCards() {
+        viewModelScope.launch(Dispatchers.Main) {
+            cardsOfCategoryList.clear()
+
+            delay(50)
+
+            val activeIndexForCategory = 0
+
+            categories.forEachIndexed { index, category ->
+                cardsOfCategoryList.add(
+                    CardsOfCategory(
+                        isActive = category.isActive,
+                        category = category,
+                    ).also { cardsOfCategory ->
+                        val list = listOf(
+                            Card(
+                                name = "${category.name} Card 1",
+                                color = category.color
+                            ),
+                            Card(
+                                name = "${category.name} Card 2",
+                                color = category.color
+                            ),
+                            Card(
+                                name = "${category.name} Card 3",
+                                color = category.color
+                            ),
+                            Card(
+                                name = "${category.name} Card 4",
+                                color = category.color
+                            ),
+                            Card(
+                                name = "${category.name} Card 5",
+                                color = category.color,
+                            )
+                        )
+                        cardsOfCategory.list.addAll(
+                            list.onEachIndexed { i, c ->
+                                c.alpha = getAlphaForCard(i, list.size)
+                                c.currentAlpha = c.alpha
+                                c.bottomPadding = getBottomPaddingForCard(i, list.size)
+                                c.topPadding = getTopPaddingForCard(i, list.size)
+                                c.currentBottomPadding = c.bottomPadding
+                                c.currentTopPadding = c.topPadding
+                            }
+                        )
+                        cardsOfCategory.apply {
+                            when {
+                                index < activeIndexForCategory -> {
+                                    this.currentAlpha = 0F
+                                    this.currentOffsetX = (-400).dp
+                                }
+
+                                index > activeIndexForCategory -> {
+                                    this.currentAlpha = 0F
+                                    this.currentOffsetX = (0).dp
+                                }
+
+                                else -> {
+                                    this.currentAlpha = 1F
+                                    this.currentOffsetX = (0).dp
+                                }
+                            }
+                        }
+                    })
             }
 
-            newCategorySelected(
-                cardsOfCategoryList[indexOfCurrentCategory].category,
-                cardsOfCategoryList[indexOfNewCategory].category
-            )
+            cardsOfCategoryList[0].isVisible = true
         }
+
+
     }
 
     private fun getAlphaForCard(i: Int, size: Int): Float {
